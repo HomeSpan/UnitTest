@@ -56,6 +56,10 @@
 #include "extras/PwmPin.h"
 #include "DEV_Identify.h"
 
+CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 360, false);
+CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
+CUSTOM_CHAR(FavoriteBrightness, 00000003-0001-0001-0001-46637266EA00, PR+PW+EV, INT, 0, 0, 100, false);
+
 ///////////////////////////////
 
 struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
@@ -64,6 +68,11 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
   Characteristic::Hue H{0,true};
   Characteristic::Saturation S{0,true};
   Characteristic::Brightness V{100,true};
+
+  Characteristic::FavoriteHue fH{120,true};           // use custom characteristics to store favorite settings for RGB button
+  Characteristic::FavoriteSaturation fS{100,true};
+  Characteristic::FavoriteBrightness fV{100,true};
+  
   LedPin *redPin, *greenPin, *bluePin;
 
   float favoriteH=240;
@@ -87,9 +96,9 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 
     int p=power.getNewVal();
     
-    float h=H.getNewVal<float>();                // range = [0,360]
-    float s=S.getNewVal<float>();                // range = [0,100]
-    float v=V.getNewVal<float>();                // range = [0,100]
+    float h=H.getNewVal<float>();              // range = [0,360]
+    float s=S.getNewVal<float>();              // range = [0,100]
+    float v=V.getNewVal<float>();              // range = [0,100]
 
     float r,g,b;
     
@@ -99,7 +108,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     greenPin->set(g*p*100.0);    
     bluePin->set(b*p*100.0);    
       
-    return(true);                               // return true
+    return(true);                              // return true
   
   }
 
@@ -107,15 +116,26 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 
     switch(pressType){
 
-      case SpanButton::SINGLE:
+      case SpanButton::SINGLE:                 // toggle power on/off
         power.setVal(1-power.getVal());
       break;
 
-      case SpanButton::DOUBLE:
-        H.setVal(favoriteH);
-        S.setVal(favoriteS);
-        V.setVal(favoriteV);
+      case SpanButton::DOUBLE:                 // set LED to favorite HSV
+        H.setVal(fH.getVal<float>());
+        S.setVal(fS.getVal<float>());
+        V.setVal(fV.getVal());
       break;
+
+      case SpanButton::LONG:                   // set favorite HSV to current HSV
+        fH.setVal(H.getVal<float>());
+        fS.setVal(S.getVal<float>());
+        fV.setVal(V.getVal());
+        redPin->set(0);                        // turn off LED for 50ms to indicate new favorite has been saved
+        greenPin->set(0);
+        bluePin->set(0);
+        delay(50);
+      break;
+      
     }
     
     update();  // call to update LED
