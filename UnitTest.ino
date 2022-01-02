@@ -34,7 +34,7 @@
   #define LED_GREEN_PIN   5
   #define LED_BLUE_PIN    0
   #define LED_BUTTON      9
-  #define CHIP            " (C3)"
+  #define CHIP            "32C3"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
@@ -45,7 +45,7 @@
   #define LED_GREEN_PIN   33
   #define LED_BLUE_PIN    13
   #define LED_BUTTON      38
-  #define CHIP            " (S2)"
+  #define CHIP            "32S2"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32)
 
@@ -197,19 +197,19 @@ void setup() {
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
  
-  homeSpan.begin(Category::Bridges,"HomeSpan Unit Test" CHIP);
+  homeSpan.begin(Category::Bridges,"HomeSpan Unit Test " CHIP);
 
   new SpanAccessory();
-    new DEV_Identify("HomeSpan Unit Test" CHIP,"HomeSpan","123-ABC","HS Bridge","1.0",3);
+    new DEV_Identify("HomeSpan Unit Test " CHIP,"HomeSpan ",CHIP,"HS Bridge","1.0",3);
     new Service::HAPProtocolInformation();
       new Characteristic::Version("1.1.0");
 
   new SpanAccessory();
-    new DEV_Identify("Pixel LED","HomeSpan","123-ABC","SK68XX","1.0",3);
+    new DEV_Identify("Pixel LED","HomeSpan",CHIP,"SK68XX","1.0",3);
     new Pixel_Light(PIXEL_PIN);
  
   new SpanAccessory();
-    new DEV_Identify("PWM LED","HomeSpan","123-ABC","RGB LED","1.0",3);
+    new DEV_Identify("PWM LED","HomeSpan",CHIP,"RGB LED","1.0",3);
     new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
 
       
