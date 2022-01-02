@@ -34,7 +34,7 @@
   #define LED_GREEN_PIN   5
   #define LED_BLUE_PIN    0
   #define LED_BUTTON      9
-  #define CHIP            "ESP32-C3"
+  #define CHIP            " (C3)"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
@@ -45,7 +45,7 @@
   #define LED_GREEN_PIN   33
   #define LED_BLUE_PIN    13
   #define LED_BUTTON      38
-  #define CHIP            "ESP32-S2"
+  #define CHIP            " (S2)"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32)
 
@@ -197,10 +197,10 @@ void setup() {
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
  
-  homeSpan.begin(Category::Bridges,"HomeSpan Unit Test");
+  homeSpan.begin(Category::Bridges,"HomeSpan Unit Test" CHIP);
 
   new SpanAccessory();
-    new DEV_Identify("HomeSpan Unit Test","HomeSpan","123-ABC","HS Bridge","1.0",3);
+    new DEV_Identify("HomeSpan Unit Test" CHIP,"HomeSpan","123-ABC","HS Bridge","1.0",3);
     new Service::HAPProtocolInformation();
       new Characteristic::Version("1.1.0");
 
