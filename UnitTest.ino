@@ -32,8 +32,9 @@
   #define PIXEL_PIN       8
   #define LED_RED_PIN     7
   #define LED_GREEN_PIN   5
-  #define LED_BLUE_PIN    6
+  #define LED_BLUE_PIN    0
   #define LED_BUTTON      9
+  #define CHIP            "ESP32-C3"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
@@ -42,8 +43,9 @@
   #define PIXEL_PIN       18
   #define LED_RED_PIN     35
   #define LED_GREEN_PIN   33
-  #define LED_BLUE_PIN    34
+  #define LED_BLUE_PIN    13
   #define LED_BUTTON      38
+  #define CHIP            "ESP32-S2"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32)
 
@@ -55,6 +57,8 @@
 #include "extras/Pixel.h"
 #include "extras/PwmPin.h"
 #include "DEV_Identify.h"
+
+// Create Custom Characteristics to save a "favorite" HSV color
 
 CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 360, false);
 CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
@@ -86,6 +90,15 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     redPin=new LedPin(red_pin);        // configures a PWM LED for output to the RED pin
     greenPin=new LedPin(green_pin);    // configures a PWM LED for output to the GREEN pin
     bluePin=new LedPin(blue_pin);      // configures a PWM LED for output to the BLUE pin
+
+    fH.setDescription("Favorite Hue");          // Setting a description, range, and unit allows these Characteristics to be represented generically in the Eve HomeKit App
+    fH.setRange(0,360,1);
+    fS.setDescription("Favorite Saturation");
+    fS.setRange(0,100,1);
+    fS.setUnit("percentage");
+    fV.setDescription("Favorite Brightness");
+    fV.setRange(0,100,1);
+    fV.setUnit("percentage");
     
     new SpanButton(buttonPin);        // create a control button for the RGB LED
     
