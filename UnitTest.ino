@@ -190,12 +190,19 @@ struct Pixel_Light : Service::LightBulb {      // Addressable RGB Pixel
 
 ///////////////////////////////
 
+Pixel_Light *pixelLight;
+RGB_LED *rgbLED;
+
 void setup() {
   
   Serial.begin(115200);
 
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
+  homeSpan.enableOTA();
+
+  new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", setHSV);
+  new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", setHSV);
  
   homeSpan.begin(Category::Bridges,"HomeSpan Unit Test " CHIP);
 
@@ -206,11 +213,11 @@ void setup() {
 
   new SpanAccessory();
     new DEV_Identify("Pixel LED","HomeSpan",CHIP,"SK68XX","1.0",3);
-    new Pixel_Light(PIXEL_PIN);
+    pixelLight=new Pixel_Light(PIXEL_PIN);
  
   new SpanAccessory();
     new DEV_Identify("PWM LED","HomeSpan",CHIP,"RGB LED","1.0",3);
-    new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
+    rgbLED=new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
 
       
 }
@@ -219,4 +226,36 @@ void setup() {
 
 void loop() {
   homeSpan.poll();
+}
+
+///////////////////////////////
+
+void setHSV(const char *buf){
+  float h,s,r,g,b;
+  char c,dummy;
+ 
+  if(sscanf(buf,"%c %f %f %[^ \t]\n",&c,&h,&s,&dummy)!=3){
+    Serial.printf("usage: %c <H S V>, where H=[0,360] and S=[0,100]\n\n",c);
+    return;
+  }
+
+  switch(c){
+
+    case 'P':
+      Serial.printf("Setting Pixel Light to H=%.1f, S=%.1f\n\n",h,s);
+      pixelLight->power.setVal(1);
+      pixelLight->H.setVal(h);
+      pixelLight->S.setVal(s);
+      pixelLight->update();      
+    break;
+
+    case 'L':
+      Serial.printf("Setting RGB LED Light to H=%.1f, S=%.1f \n\n",h,s);
+      rgbLED->power.setVal(1);
+      rgbLED->H.setVal(h);
+      rgbLED->S.setVal(s);
+      rgbLED->update();
+    break;
+  }
+    
 }
