@@ -34,8 +34,8 @@
   #define LED_GREEN_PIN   5
   #define LED_BLUE_PIN    0
   #define LED_BUTTON      9
-  #define SDA_PIN         3
-  #define SCL_PIN         2
+  #define SDA_PIN         2
+  #define SCL_PIN         3
   #define CHIP            "32C3"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
@@ -47,6 +47,8 @@
   #define LED_GREEN_PIN   33
   #define LED_BLUE_PIN    13
   #define LED_BUTTON      38
+  #define SDA_PIN         8
+  #define SCL_PIN         9
   #define CHIP            "32S2"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32)
