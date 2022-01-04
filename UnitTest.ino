@@ -34,6 +34,8 @@
   #define LED_GREEN_PIN   5
   #define LED_BLUE_PIN    0
   #define LED_BUTTON      9
+  #define SDA_PIN         3
+  #define SCL_PIN         2
   #define CHIP            "32C3"
   
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
@@ -52,7 +54,8 @@
   #error "Unit Test Not Avaiable for ESP32"
   
 #endif
- 
+
+#include <Wire.h>
 #include "HomeSpan.h"
 #include "extras/Pixel.h"
 #include "extras/PwmPin.h"
@@ -190,6 +193,93 @@ struct Pixel_Light : Service::LightBulb {      // Addressable RGB Pixel
 
 ///////////////////////////////
 
+struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature sensor
+
+  Characteristic::CurrentTemperature temp{-40};
+  Characteristic::StatusActive status{0};
+  
+  int addr;                                          // I2C address of temperature sensor
+  uint32_t timer=0;                                  // keep track of time since last update
+  
+  TempSensor(int addr) : Service::TemperatureSensor(){       // constructor() method
+
+    this->addr=addr;                      // I2C address of temperature sensor
+    temp.setRange(-50,100);
+
+    Wire.setPins(SDA_PIN,SCL_PIN);        // set I2C pins
+    Wire.begin();                         // start I2C in Controller Mode
+    
+    readSensor();                         // initial read of Sensor
+        
+  } // end constructor
+
+  void loop(){
+
+    char c[64];
+
+    if(millis()-timer>5000){                // only sample every 5 seconds
+      timer=millis();
+      readSensor();      
+    }
+    
+  } // loop
+
+  void readSensor(){
+
+    char c[64];
+    uint8_t oldStatus=status.getVal();
+    
+    Wire.beginTransmission(addr);         // setup transmission
+    Wire.write(0x0B);                     // ADT7410 Identification Register
+    Wire.endTransmission(0);              // transmit and leave in restart mode to allow reading
+    Wire.requestFrom(addr,1);             // request read of single byte
+    uint8_t id=Wire.read();               // receive a byte
+
+    if(id!=0xCB){                         // problem reading from chip
+      if(oldStatus){                      // oldStatus was okay
+        status.setVal(0);                   // set status to inactive, and
+        temp.setVal(-40);                   // set temperature to -40
+        
+        sprintf(c,"ADT7410-%02X Temperature Sensor is INACTIVE\n",addr);
+        LOG1(c);
+      }
+      return;
+    }
+
+    if(!oldStatus){                       // oldStatus was not okay
+      Wire.beginTransmission(addr);         // setup transmission
+      Wire.write(0x03);                     // ADT740 Configuration Register
+      Wire.write(0xC0);                     // set 16-bit temperature resolution, 1 sample per second
+      Wire.endTransmission();               // transmit      
+      status.setVal(1);
+      sprintf(c,"ADT7410-%02X Temperature Sensor is ACTIVE\n",addr);
+      LOG1(c);
+    }
+
+    Wire.beginTransmission(addr);         // setup transmission
+    Wire.write(0x00);                     // ADT7410 2-byte Temperature
+    Wire.endTransmission(0);              // transmit and leave in restart mode to allow reading
+    Wire.requestFrom(addr,2);             // request read of two bytes
+
+    double tempC;
+    int16_t iTemp;
+    
+    iTemp=((int16_t)Wire.read()<<8)+Wire.read();    
+    tempC=iTemp/128.0;
+
+    if(abs(temp.getVal<double>()-tempC)>0.50){    // only update temperature if change is more than 0.5C     
+      temp.setVal(tempC);
+      
+      sprintf(c,"ADT7410-%02X Temperature Update: %g\n",addr,tempC);
+      LOG1(c);
+    }
+    
+  }  // readSensor
+  
+};
+      
+///////////////////////////////
+
 Pixel_Light *pixelLight;
 RGB_LED *rgbLED;
 
@@ -200,6 +290,7 @@ void setup() {
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
   homeSpan.enableOTA();
+  homeSpan.setLogLevel(1);
 
   new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", setHSV);
   new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", setHSV);
@@ -219,6 +310,9 @@ void setup() {
     new DEV_Identify("PWM LED","HomeSpan",CHIP,"RGB LED","1.0",3);
     rgbLED=new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
 
+  new SpanAccessory();                                                          
+    new DEV_Identify("Temp Sensor","HomeSpan","ADT7410","Adafruit I2C Temp Sensor","1.0",3);
+    new TempSensor(0x48);
       
 }
 
