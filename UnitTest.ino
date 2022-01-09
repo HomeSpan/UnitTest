@@ -186,7 +186,7 @@ struct Pixel_Light : Service::LightBulb {      // Addressable RGB Pixel
     float s=S.getNewVal<float>();                // range = [0,100]
     float v=V.getNewVal<float>();                // range = [0,100]
 
-    pixel->setHSV(h*p, s*p/100.0, v*p/100.0);    // must scale down S and V from [0,100] to [0.0,1.0]
+    pixel->setHSV(h*p, s*p, v*p);
           
     return(true);  
   }
