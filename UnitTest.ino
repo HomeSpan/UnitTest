@@ -25,43 +25,21 @@
  *  
  ********************************************************************************/
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
-
-  #define CONTROL_PIN     1
-  #define STATUS_PIN      10
-  #define PIXEL_PIN       8
-  #define LED_RED_PIN     7
-  #define LED_GREEN_PIN   5
-  #define LED_BLUE_PIN    0
-  #define LED_BUTTON      9
-  #define SDA_PIN         2
-  #define SCL_PIN         3
-  #define CHIP            "32C3"
-  
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-
-  #define CONTROL_PIN     14
-  #define STATUS_PIN      15
-  #define PIXEL_PIN       18
-  #define LED_RED_PIN     35
-  #define LED_GREEN_PIN   33
-  #define LED_BLUE_PIN    13
-  #define LED_BUTTON      38
-  #define SDA_PIN         8
-  #define SCL_PIN         9
-  #define CHIP            "32S2"
-  
-#elif defined(CONFIG_IDF_TARGET_ESP32)
-
-  #error "Unit Test Not Avaiable for ESP32"
-  
-#endif
-
 #include <Wire.h>
+#include "FeatherPins.h"
+
 #include "HomeSpan.h"
 #include "extras/Pixel.h"
 #include "extras/PwmPin.h"
 #include "DEV_Identify.h"
+
+#define CONTROL_PIN   F25
+#define STATUS_PIN    F26
+#define LED_RED_PIN   F33
+#define LED_BLUE_PIN  F32
+#define LED_GREEN_PIN F14
+#define LED_BUTTON    F4
+#define PIXEL_PIN     F27
 
 // Create Custom Characteristics to save a "favorite" HSV color
 
@@ -163,7 +141,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
       
 ///////////////////////////////
 
-struct Pixel_Light : Service::LightBulb {      // Addressable RGB Pixel
+struct Pixel_Light : Service::LightBulb {      // NeoPixel RGB
  
   Characteristic::On power{0,true};
   Characteristic::Hue H{0,true};
@@ -186,7 +164,7 @@ struct Pixel_Light : Service::LightBulb {      // Addressable RGB Pixel
     float s=S.getNewVal<float>();                // range = [0,100]
     float v=V.getNewVal<float>();                // range = [0,100]
 
-    pixel->setHSV(h*p, s*p, v*p);
+    pixel->set(Pixel::HSV(h,s,v*p));
           
     return(true);  
   }
@@ -208,7 +186,7 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
     this->addr=addr;                      // I2C address of temperature sensor
     temp.setRange(-50,100);
 
-    Wire.setPins(SDA_PIN,SCL_PIN);        // set I2C pins
+    Wire.setPins(SDA,SCL);        // set I2C pins
     Wire.begin();                         // start I2C in Controller Mode
     
     readSensor();                         // initial read of Sensor
@@ -297,23 +275,23 @@ void setup() {
   new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", setHSV);
   new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", setHSV);
  
-  homeSpan.begin(Category::Bridges,"HomeSpan Unit Test " CHIP);
+  homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
-    new DEV_Identify("HomeSpan Unit Test " CHIP,"HomeSpan ",CHIP,"HS Bridge","1.0",3);
+    new DEV_Identify("HomeSpan UnitTest" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "HS Bridge", "1.0", 3);
     new Service::HAPProtocolInformation();
       new Characteristic::Version("1.1.0");
 
   new SpanAccessory();
-    new DEV_Identify("Pixel LED","HomeSpan",CHIP,"SK68XX","1.0",3);
+    new DEV_Identify("Pixel LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "NeoPixel RGB","1.0", 3);
     pixelLight=new Pixel_Light(PIXEL_PIN);
  
   new SpanAccessory();
-    new DEV_Identify("PWM LED","HomeSpan",CHIP,"RGB LED","1.0",3);
+    new DEV_Identify("PWM LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "RGB LED", "1.0", 3);
     rgbLED=new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
 
   new SpanAccessory();                                                          
-    new DEV_Identify("Temp Sensor","HomeSpan","ADT7410","Adafruit I2C Temp Sensor","1.0",3);
+    new DEV_Identify("Temp Sensor" DEVICE_SUFFIX, "HomeSpan", "ADT7410", "Adafruit I2C Temp Sensor", "1.0", 3);
     new TempSensor(0x48);
       
 }
@@ -331,7 +309,7 @@ void setHSV(const char *buf){
   char c,dummy;
  
   if(sscanf(buf,"%c %f %f %[^ \t]\n",&c,&h,&s,&dummy)!=3){
-    Serial.printf("usage: %c <H S V>, where H=[0,360] and S=[0,100]\n\n",c);
+    Serial.printf("usage: %c <H S>, where H=[0,360] and S=[0,100]\n\n",c);
     return;
   }
 
