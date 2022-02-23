@@ -140,7 +140,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
   }
 
   static void cliSetHSV(const char *buf, void *arg){
-    float h,s,r,g,b;
+    float h,s;
     char c,dummy;
     RGB_LED *rgbLED=(RGB_LED *)arg;
    
@@ -149,7 +149,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
       return;
     }
   
-    Serial.printf("Setting RGB LED Light to H=%.1f, S=%.1f \n\n",h,s);
+    Serial.printf("Setting RGB LED to H=%.1f, S=%.1f \n\n",h,s);
     rgbLED->power.setVal(1);
     rgbLED->H.setVal(h);
     rgbLED->S.setVal(s);
@@ -160,7 +160,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
       
 ///////////////////////////////
 
-struct Pixel_Light : Service::LightBulb {      // NeoPixel RGB
+struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
  
   Characteristic::On power{0,true};
   Characteristic::Hue H{0,true};
@@ -168,7 +168,7 @@ struct Pixel_Light : Service::LightBulb {      // NeoPixel RGB
   Characteristic::Brightness V{100,true};
   Pixel *pixel;                                
   
-  Pixel_Light(int pin) : Service::LightBulb(){
+  NeoPixel(int pin) : Service::LightBulb(){
 
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
@@ -192,20 +192,20 @@ struct Pixel_Light : Service::LightBulb {      // NeoPixel RGB
   }
 
   static void cliSetHSV(const char *buf, void *arg){
-    float h,s,r,g,b;
+    float h,s;
     char c,dummy;
-    Pixel_Light *pixelLight=(Pixel_Light *)arg;
+    NeoPixel *neoPixel=(NeoPixel *)arg;
    
     if(sscanf(buf,"%c %f %f %[^ \t]\n",&c,&h,&s,&dummy)!=3){
       Serial.printf("usage: %c <H S>, where H=[0,360] and S=[0,100]\n\n",c);
       return;
     }
   
-    Serial.printf("Setting RGB LED Light to H=%.1f, S=%.1f \n\n",h,s);
-    pixelLight->power.setVal(1);
-    pixelLight->H.setVal(h);
-    pixelLight->S.setVal(s);
-    pixelLight->update();      
+    Serial.printf("Setting NeoPixel to H=%.1f, S=%.1f \n\n",h,s);
+    neoPixel->power.setVal(1);
+    neoPixel->H.setVal(h);
+    neoPixel->S.setVal(s);
+    neoPixel->update();      
   }   
 
 };
@@ -225,7 +225,7 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
     this->addr=addr;                      // I2C address of temperature sensor
     temp.setRange(-50,100);
 
-    Wire.setPins(SDA,SCL);        // set I2C pins
+    Wire.setPins(SDA,SCL);                // set I2C pins
     Wire.begin();                         // start I2C in Controller Mode
     
     readSensor();                         // initial read of Sensor
@@ -299,9 +299,6 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
       
 ///////////////////////////////
 
-//Pixel_Light *pixelLight;
-//RGB_LED *rgbLED;
-
 void setup() {
   
   Serial.begin(115200);
@@ -311,9 +308,6 @@ void setup() {
   homeSpan.enableOTA();
   homeSpan.setLogLevel(1);
 
-//  new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", setHSV);
-//  new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", setHSV);
- 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
@@ -323,7 +317,7 @@ void setup() {
 
   new SpanAccessory();
     new DEV_Identify("Pixel LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "NeoPixel RGB","1.0", 3);
-    new Pixel_Light(PIXEL_PIN);
+    new NeoPixel(PIXEL_PIN);
  
   new SpanAccessory();
     new DEV_Identify("PWM LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "RGB LED", "1.0", 3);
@@ -342,33 +336,3 @@ void loop() {
 }
 
 ///////////////////////////////
-
-//void setHSV(const char *buf){
-//  float h,s,r,g,b;
-//  char c,dummy;
-// 
-//  if(sscanf(buf,"%c %f %f %[^ \t]\n",&c,&h,&s,&dummy)!=3){
-//    Serial.printf("usage: %c <H S>, where H=[0,360] and S=[0,100]\n\n",c);
-//    return;
-//  }
-//
-//  switch(c){
-//
-//    case 'P':
-//      Serial.printf("Setting Pixel Light to H=%.1f, S=%.1f\n\n",h,s);
-//      pixelLight->power.setVal(1);
-//      pixelLight->H.setVal(h);
-//      pixelLight->S.setVal(s);
-//      pixelLight->update();      
-//    break;
-//
-//    case 'L':
-//      Serial.printf("Setting RGB LED Light to H=%.1f, S=%.1f \n\n",h,s);
-//      rgbLED->power.setVal(1);
-//      rgbLED->H.setVal(h);
-//      rgbLED->S.setVal(s);
-//      rgbLED->update();
-//    break;
-//  }
-//    
-//}
