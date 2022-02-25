@@ -307,6 +307,7 @@ void setup() {
   homeSpan.setStatusPin(STATUS_PIN);
   homeSpan.enableOTA();
   homeSpan.setLogLevel(1);
+  homeSpan.setWifiCallback(wifiEstablished);
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
@@ -336,3 +337,18 @@ void loop() {
 }
 
 ///////////////////////////////
+
+void wifiEstablished(){
+
+  #define printPin(X)   Serial.printf("%-15s = %4s (GPIO %d)\n",#X,STRINGIFY(X),X);
+
+  Serial.printf("\nHOMESPAN UNIT TEST PINS:\n\n");
+  printPin(CONTROL_PIN);
+  printPin(STATUS_PIN);
+  printPin(LED_RED_PIN);
+  printPin(LED_BLUE_PIN);
+  printPin(LED_GREEN_PIN);
+  printPin(LED_BUTTON);
+  printPin(PIXEL_PIN);
+  Serial.printf("\n\n");
+}
