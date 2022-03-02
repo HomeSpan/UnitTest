@@ -173,7 +173,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
 
-    new SpanUserCommand('P', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
+    new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
     
     update();                                 // manually call update() to set pixel with restored initial values    
   }
