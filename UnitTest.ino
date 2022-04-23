@@ -351,7 +351,7 @@ void setup() {
       new Characteristic::Model("Adafruit I2C Temp Sensor");
     new TempSensor(0x48);
  
-  homeSpan.start();       // start homeSpan.poll() in background
+  homeSpan.autoPoll();       // start homeSpan.poll() in background
       
 }
 
