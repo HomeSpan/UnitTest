@@ -47,6 +47,7 @@ CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 
 CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
 CUSTOM_CHAR(FavoriteBrightness, 00000003-0001-0001-0001-46637266EA00, PR+PW+EV, INT, 0, 0, 100, false);
 
+
 ///////////////////////////////
 
 struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
@@ -308,6 +309,7 @@ void setup() {
   homeSpan.enableOTA();
   homeSpan.setLogLevel(1);
   homeSpan.setWifiCallback(wifiEstablished);
+  homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
@@ -327,13 +329,14 @@ void setup() {
   new SpanAccessory();                                                          
     new DEV_Identify("Temp Sensor" DEVICE_SUFFIX, "HomeSpan", "ADT7410", "Adafruit I2C Temp Sensor", "1.0", 3);
     new TempSensor(0x48);
+ 
+  homeSpan.start();       // start homeSpan.poll() in background
       
 }
 
 ///////////////////////////////
 
 void loop() {
-  homeSpan.poll();
 }
 
 ///////////////////////////////
