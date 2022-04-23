@@ -31,7 +31,6 @@
 #include "HomeSpan.h"
 #include "extras/Pixel.h"
 #include "extras/PwmPin.h"
-#include "DEV_Identify.h"
 
 #define CONTROL_PIN   F25
 #define STATUS_PIN    F26
@@ -87,6 +86,8 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
     
     new SpanButton(buttonPin);        // create a control button for the RGB LED
+
+    WEBLOG("Configured PWM LED using RGB pins [%d,%d,%d] with button on pin %d\n",red_pin,green_pin,blue_pin,buttonPin);
     
     update();                         // manually call update() to set pixel with restored initial values    
   }
@@ -105,7 +106,10 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 
     redPin->set(r*p*100.0);                         // update the ledPin channels with new values
     greenPin->set(g*p*100.0);    
-    bluePin->set(b*p*100.0);    
+    bluePin->set(b*p*100.0);
+
+    if(power.updated())
+      WEBLOG("HomeKit set PWM LED %s\n",p?"ON":"OFF");
       
     return(true);                              // return true
   
@@ -117,12 +121,14 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 
       case SpanButton::SINGLE:                 // toggle power on/off
         power.setVal(1-power.getVal());
+        WEBLOG("Single button press set PWM LED %s\n",power.getVal()?"ON":"OFF");
       break;
 
       case SpanButton::DOUBLE:                 // set LED to favorite HSV
         H.setVal(fH.getVal<float>());
         S.setVal(fS.getVal<float>());
         V.setVal(fV.getVal());
+        WEBLOG("Double button press set PWM LED to Favorite HSV Color of [%g,%g,%d]\n",H.getVal<float>(),S.getVal<float>(),V.getVal());
       break;
 
       case SpanButton::LONG:                   // set favorite HSV to current HSV
@@ -133,6 +139,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
         greenPin->set(0);
         bluePin->set(0);
         delay(50);
+        WEBLOG("Long button press set PWM LED Favorite HSV Color to [%g,%g,%d]\n",fH.getVal<float>(),fS.getVal<float>(),fV.getVal());
       break;
       
     }
@@ -150,7 +157,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
       return;
     }
   
-    Serial.printf("Setting RGB LED to H=%.1f, S=%.1f \n\n",h,s);
+    WEBLOG("Setting PWM LED to H=%.1f, S=%.1f \n\n",h,s);
     rgbLED->power.setVal(1);
     rgbLED->H.setVal(h);
     rgbLED->S.setVal(s);
@@ -176,6 +183,8 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
 
     new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
     
+    WEBLOG("Configured NeoPixel LED on pin %d\n",pin);
+
     update();                                 // manually call update() to set pixel with restored initial values    
   }
 
@@ -189,6 +198,9 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
 
     pixel->set(Pixel::HSV(h,s,v*p));
           
+    if(power.updated())
+      WEBLOG("HomeKit set NeoPixel LED %s\n",p?"ON":"OFF");
+
     return(true);  
   }
 
@@ -202,7 +214,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
       return;
     }
   
-    Serial.printf("Setting NeoPixel to H=%.1f, S=%.1f \n\n",h,s);
+    WEBLOG("Setting NeoPixel to H=%.1f, S=%.1f \n\n",h,s);
     neoPixel->power.setVal(1);
     neoPixel->H.setVal(h);
     neoPixel->S.setVal(s);
@@ -229,6 +241,8 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
     Wire.setPins(SDA,SCL);                // set I2C pins
     Wire.begin();                         // start I2C in Controller Mode
     
+    WEBLOG("Configured Temp Sensor using I2C SDA=%d and SCL=%d pins\n",SDA,SCL);
+
     readSensor();                         // initial read of Sensor
         
   } // end constructor
@@ -314,20 +328,27 @@ void setup() {
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
-    new DEV_Identify("HomeSpan UnitTest" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "HS Bridge", "1.0", 3);
-    new Service::HAPProtocolInformation();
-      new Characteristic::Version("1.1.0");
+    new Service::AccessoryInformation();
+      new Characteristic::Identify(); 
 
   new SpanAccessory();
-    new DEV_Identify("Pixel LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "NeoPixel RGB","1.0", 3);
+    new Service::AccessoryInformation();
+      new Characteristic::Identify(); 
+      new Characteristic::Name("NeoPixel LED");
     new NeoPixel(PIXEL_PIN);
  
   new SpanAccessory();
-    new DEV_Identify("PWM LED" DEVICE_SUFFIX, "HomeSpan", "ESP32" DEVICE_SUFFIX, "RGB LED", "1.0", 3);
+    new Service::AccessoryInformation();
+      new Characteristic::Identify(); 
+      new Characteristic::Name("PWM LED");
     new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
 
   new SpanAccessory();                                                          
-    new DEV_Identify("Temp Sensor" DEVICE_SUFFIX, "HomeSpan", "ADT7410", "Adafruit I2C Temp Sensor", "1.0", 3);
+    new Service::AccessoryInformation();
+      new Characteristic::Identify(); 
+      new Characteristic::Name("Temp Sensor");
+      new Characteristic::SerialNumber("ADT7410");    
+      new Characteristic::Model("Adafruit I2C Temp Sensor");
     new TempSensor(0x48);
  
   homeSpan.start();       // start homeSpan.poll() in background
