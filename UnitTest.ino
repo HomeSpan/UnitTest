@@ -324,12 +324,15 @@ void setup() {
   homeSpan.setLogLevel(1);
   homeSpan.setWifiCallback(wifiEstablished);
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
+  homeSpan.setSketchVersion("2.0");
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
     new Service::AccessoryInformation();
-      new Characteristic::Identify(); 
+      new Characteristic::Identify();
+      new Characteristic::Model("HomeSpan Unit Test" DEVICE_SUFFIX);
+      new Characteristic::FirmwareRevision(homeSpan.getSketchVersion());
 
   new SpanAccessory();
     new Service::AccessoryInformation();
