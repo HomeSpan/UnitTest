@@ -87,7 +87,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     
     new SpanButton(buttonPin);        // create a control button for the RGB LED
 
-    WEBLOG("Configured PWM LED using RGB pins [%d,%d,%d] with button on pin %d\n",red_pin,green_pin,blue_pin,buttonPin);
+    WEBLOG("Configured PWM LED using RGB pins [%d,%d,%d] with button on pin %d",red_pin,green_pin,blue_pin,buttonPin);
     
     update();                         // manually call update() to set pixel with restored initial values    
   }
@@ -109,7 +109,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     bluePin->set(b*p*100.0);
 
     if(power.updated())
-      WEBLOG("HomeKit set PWM LED %s\n",p?"ON":"OFF");
+      WEBLOG("HomeKit set PWM LED %s",p?"ON":"OFF");
       
     return(true);                              // return true
   
@@ -121,14 +121,14 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 
       case SpanButton::SINGLE:                 // toggle power on/off
         power.setVal(1-power.getVal());
-        WEBLOG("Single button press set PWM LED %s\n",power.getVal()?"ON":"OFF");
+        WEBLOG("Single button press set PWM LED %s",power.getVal()?"ON":"OFF");
       break;
 
       case SpanButton::DOUBLE:                 // set LED to favorite HSV
         H.setVal(fH.getVal<float>());
         S.setVal(fS.getVal<float>());
         V.setVal(fV.getVal());
-        WEBLOG("Double button press set PWM LED to Favorite HSV Color of [%g,%g,%d]\n",H.getVal<float>(),S.getVal<float>(),V.getVal());
+        WEBLOG("Double button press set PWM LED to Favorite HSV Color of [%g,%g,%d]",H.getVal<float>(),S.getVal<float>(),V.getVal());
       break;
 
       case SpanButton::LONG:                   // set favorite HSV to current HSV
@@ -139,7 +139,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
         greenPin->set(0);
         bluePin->set(0);
         delay(50);
-        WEBLOG("Long button press set PWM LED Favorite HSV Color to [%g,%g,%d]\n",fH.getVal<float>(),fS.getVal<float>(),fV.getVal());
+        WEBLOG("Long button press set PWM LED Favorite HSV Color to [%g,%g,%d]",fH.getVal<float>(),fS.getVal<float>(),fV.getVal());
       break;
       
     }
@@ -157,7 +157,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
       return;
     }
   
-    WEBLOG("Setting PWM LED to H=%.1f, S=%.1f \n\n",h,s);
+    WEBLOG("Setting PWM LED to H=%.1f, S=%.1f",h,s);
     rgbLED->power.setVal(1);
     rgbLED->H.setVal(h);
     rgbLED->S.setVal(s);
@@ -183,7 +183,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
 
     new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
     
-    WEBLOG("Configured NeoPixel LED on pin %d\n",pin);
+    WEBLOG("Configured NeoPixel LED on pin %d",pin);
 
     update();                                 // manually call update() to set pixel with restored initial values    
   }
@@ -199,7 +199,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
     pixel->set(Pixel::HSV(h,s,v*p));
           
     if(power.updated())
-      WEBLOG("HomeKit set NeoPixel LED %s\n",p?"ON":"OFF");
+      WEBLOG("HomeKit set NeoPixel LED %s",p?"ON":"OFF");
 
     return(true);  
   }
@@ -214,7 +214,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
       return;
     }
   
-    WEBLOG("Setting NeoPixel to H=%.1f, S=%.1f \n\n",h,s);
+    WEBLOG("Setting NeoPixel to H=%.1f, S=%.1f",h,s);
     neoPixel->power.setVal(1);
     neoPixel->H.setVal(h);
     neoPixel->S.setVal(s);
@@ -241,7 +241,7 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
     Wire.setPins(SDA,SCL);                // set I2C pins
     Wire.begin();                         // start I2C in Controller Mode
     
-    WEBLOG("Configured Temp Sensor using I2C SDA=%d and SCL=%d pins\n",SDA,SCL);
+    WEBLOG("Configured Temp Sensor using I2C SDA=%d and SCL=%d pins",SDA,SCL);
 
     readSensor();                         // initial read of Sensor
         
@@ -353,7 +353,7 @@ void setup() {
       new Characteristic::SerialNumber("ADT7410");    
       new Characteristic::Model("Adafruit I2C Temp Sensor");
     new TempSensor(0x48);
- 
+
   homeSpan.autoPoll();       // start homeSpan.poll() in background
       
 }
