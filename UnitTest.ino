@@ -169,7 +169,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
 ///////////////////////////////
 
 struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
- 
+
   Characteristic::On power{0,true};
   Characteristic::Hue H{0,true};
   Characteristic::Saturation S{0,true};
@@ -344,16 +344,16 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("PWM LED");
-    new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);
+    new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);   
 
-  new SpanAccessory();                                                          
+  new SpanAccessory();   
     new Service::AccessoryInformation();
-      new Characteristic::Identify(); 
+      new Characteristic::Identify();
       new Characteristic::Name("Temp Sensor");
       new Characteristic::SerialNumber("ADT7410");    
       new Characteristic::Model("Adafruit I2C Temp Sensor");
     new TempSensor(0x48);
-
+      
   homeSpan.autoPoll();       // start homeSpan.poll() in background
       
 }
