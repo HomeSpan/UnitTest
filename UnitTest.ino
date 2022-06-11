@@ -326,6 +326,8 @@ void setup() {
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
   homeSpan.setSketchVersion("2.0");
 
+  homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
+
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
