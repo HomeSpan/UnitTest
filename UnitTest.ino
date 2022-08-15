@@ -40,6 +40,12 @@
 #define LED_BUTTON    F4
 #define PIXEL_PIN     F27
 
+#if SOC_TOUCH_SENSOR_NUM > 0
+  #define PIXEL_BUTTON  F12
+#else
+  #define PIXEL_BUTTON  -1
+#endif
+
 // Create Custom Characteristics to save a "favorite" HSV color
 
 CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 360, false);
@@ -84,10 +90,10 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     fV.setUnit("percentage");
 
     new SpanUserCommand('L', "<H S> - set the RGB LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
-    
+
     new SpanButton(buttonPin);        // create a control button for the RGB LED
 
-    WEBLOG("Configured PWM LED using RGB pins [%d,%d,%d] with button on pin %d",red_pin,green_pin,blue_pin,buttonPin);
+    WEBLOG("Configured PWM LED using RGB pins [%d,%d,%d] with pushbutton on pin %d",red_pin,green_pin,blue_pin,buttonPin);
     
     update();                         // manually call update() to set pixel with restored initial values    
   }
@@ -111,8 +117,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     if(power.updated())
       WEBLOG("HomeKit set PWM LED %s",p?"ON":"OFF");
       
-    return(true);                              // return true
-  
+    return(true);                              // return true 
   }
 
   void button(int pin, int pressType) override {
@@ -174,16 +179,38 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
   Characteristic::Hue H{0,true};
   Characteristic::Saturation S{0,true};
   Characteristic::Brightness V{100,true};
-  Pixel *pixel;                                
+
+  Characteristic::FavoriteHue fH{120,true};           // use custom characteristics to store favorite settings for RGB button
+  Characteristic::FavoriteSaturation fS{100,true};
+  Characteristic::FavoriteBrightness fV{100,true};                                
   
-  NeoPixel(int pin) : Service::LightBulb(){
+  Pixel *pixel;
+
+  float favoriteH=240;
+  float favoriteS=100;
+  float favoriteV=50;
+  
+  NeoPixel(int pin, int touchPin) : Service::LightBulb(){
 
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
 
-    new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
+    fH.setDescription("Favorite Hue");          // Setting a description, range, and unit allows these Characteristics to be represented generically in the Eve HomeKit App
+    fH.setRange(0,360,1);
+    fS.setDescription("Favorite Saturation");
+    fS.setRange(0,100,1);
+    fS.setUnit("percentage");
+    fV.setDescription("Favorite Brightness");
+    fV.setRange(0,100,1);
+    fV.setUnit("percentage");
     
-    WEBLOG("Configured NeoPixel LED on pin %d",pin);
+    new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
+
+#if SOC_TOUCH_SENSOR_NUM > 0
+    new SpanButton(touchPin, PushButton::TOUCH);        // create a control button for the RGB LED
+#endif
+    
+    WEBLOG("Configured NeoPixel LED on pin %d with touch sensor on pin %d",pin,touchPin);
 
     update();                                 // manually call update() to set pixel with restored initial values    
   }
@@ -202,6 +229,36 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
       WEBLOG("HomeKit set NeoPixel LED %s",p?"ON":"OFF");
 
     return(true);  
+  }
+
+  void button(int pin, int pressType) override {
+
+    switch(pressType){
+
+      case SpanButton::SINGLE:                 // toggle power on/off
+        power.setVal(1-power.getVal());
+        WEBLOG("Single button press set NeoPixel LED %s",power.getVal()?"ON":"OFF");
+      break;
+
+      case SpanButton::DOUBLE:                 // set LED to favorite HSV
+        H.setVal(fH.getVal<float>());
+        S.setVal(fS.getVal<float>());
+        V.setVal(fV.getVal());
+        WEBLOG("Double button press set NeoPixel LED to Favorite HSV Color of [%g,%g,%d]",H.getVal<float>(),S.getVal<float>(),V.getVal());
+      break;
+
+      case SpanButton::LONG:                   // set favorite HSV to current HSV
+        fH.setVal(H.getVal<float>());
+        fS.setVal(S.getVal<float>());
+        fV.setVal(V.getVal());
+        pixel->set(Pixel::RGB(0,0,0));         // turn off NeoPixel for 50ms to indicate new favorite has been saved
+        delay(50);
+        WEBLOG("Long button press set NeoPixel LED Favorite HSV Color to [%g,%g,%d]",fH.getVal<float>(),fS.getVal<float>(),fV.getVal());
+      break;
+      
+    }
+    
+    update();  // call to update LED
   }
 
   static void cliSetHSV(const char *buf, void *arg){
@@ -318,6 +375,14 @@ void setup() {
   
   Serial.begin(115200);
 
+//  while(1){
+//    touch_value_t x=0;
+//    for(int i=0;i<20;i++)
+//      x+=touchRead(F12);
+//    Serial.println(x/20);
+//    delay(1000);
+//  }
+
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
   homeSpan.enableOTA();
@@ -340,7 +405,7 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("NeoPixel LED");
-    new NeoPixel(PIXEL_PIN);
+    new NeoPixel(PIXEL_PIN,PIXEL_BUTTON);
  
   new SpanAccessory();
     new Service::AccessoryInformation();
@@ -379,5 +444,6 @@ void wifiEstablished(){
   printPin(LED_GREEN_PIN);
   printPin(LED_BUTTON);
   printPin(PIXEL_PIN);
+  printPin(PIXEL_BUTTON);
   Serial.printf("\n\n");
 }
