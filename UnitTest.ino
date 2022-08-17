@@ -207,7 +207,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
     new SpanUserCommand('P', "<H S> - set the Pixel LED, where H=[0,360] and S=[0,100]", cliSetHSV, this);
 
 #if SOC_TOUCH_SENSOR_NUM > 0
-    new SpanButton(touchPin, SpanButton::TRIGGER_ON_TOUCH);        // create a control button for the RGB LED
+    new SpanButton(touchPin, SpanButton::TRIGGER_ON_TOUCH);        // create a control button for the Pixel LED
 #endif
     
     WEBLOG("Configured NeoPixel LED on pin %d with touch sensor on pin %d",pin,touchPin);
