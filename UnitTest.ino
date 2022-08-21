@@ -375,14 +375,6 @@ void setup() {
   
   Serial.begin(115200);
 
-//  while(1){
-//    touch_value_t x=0;
-//    for(int i=0;i<20;i++)
-//      x+=touchRead(F12);
-//    Serial.println(x/20);
-//    delay(1000);
-//  }
-
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
   homeSpan.enableOTA();
