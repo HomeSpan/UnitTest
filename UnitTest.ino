@@ -378,12 +378,14 @@ void setup() {
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
   homeSpan.enableOTA();
-  homeSpan.setLogLevel(1);
+  homeSpan.setLogLevel(2);
   homeSpan.setWifiCallback(wifiEstablished);
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
   homeSpan.setSketchVersion("2.0");
 
   homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
+  homeSpan.setStatusCallback([](HS_STATUS status){  Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
+
   new SpanUserCommand('D', " - disconnect WiFi", [](const char *buf){WiFi.disconnect();});
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
