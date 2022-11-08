@@ -384,7 +384,7 @@ void setup() {
   homeSpan.setSketchVersion("2.0");
 
   homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
-  homeSpan.setStatusCallback([](HS_STATUS status){  Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
+  homeSpan.setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
 
   new SpanUserCommand('D', " - disconnect WiFi", [](const char *buf){WiFi.disconnect();});
 
