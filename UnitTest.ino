@@ -306,8 +306,6 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
 
   void loop(){
 
-    char c[64];
-
     if(millis()-timer>5000){                // only sample every 5 seconds
       timer=millis();
       readSensor();      
