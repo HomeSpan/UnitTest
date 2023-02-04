@@ -377,16 +377,16 @@ struct ContactSwitch : Service::ContactSensor {
   
   ContactSwitch(int togglePin) : Service::ContactSensor(){      // constructor
 
-    toggleSwitch=new SpanToggle(togglePin,PushButton::TRIGGER_ON_HIGH);                                // create toggle switch connected to VCC    
-    sensorState=new Characteristic::ContactSensorState(toggleSwitch->position()==PushButton::OPEN);    // instantiate contact sensor state
+    toggleSwitch=new SpanToggle(togglePin,SpanToggle::TRIGGER_ON_HIGH);                                // create toggle switch connected to VCC    
+    sensorState=new Characteristic::ContactSensorState(toggleSwitch->position()==SpanToggle::OPEN);    // instantiate contact sensor state
     
     WEBLOG("Configured Contact Switch on pin %d",togglePin);    
   }
 
   void button(int pin, int position) override {      
     
-      WEBLOG("Contact Switch %s\n",position==PushButton::CLOSED?"CLOSED":"OPEN");
-      sensorState->setVal(position==PushButton::OPEN);
+      WEBLOG("Contact Switch %s\n",position==SpanToggle::CLOSED?"CLOSED":"OPEN");
+      sensorState->setVal(position==SpanToggle::OPEN);
       
   }
   
