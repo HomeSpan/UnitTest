@@ -386,7 +386,7 @@ struct ContactSwitch : Service::ContactSensor {
   void button(int pin, int position) override {      
     
       WEBLOG("Contact Switch %s\n",position==SpanToggle::CLOSED?"CLOSED":"OPEN");
-      sensorState->setVal(position==SpanToggle::OPEN);
+      sensorState->setVal(position==SpanToggle::OPEN?1:0);
       
   }
   
@@ -404,7 +404,7 @@ void setup() {
   homeSpan.setLogLevel(2);
   homeSpan.setWifiCallback(wifiEstablished);
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
-  homeSpan.setSketchVersion("2.0");
+  homeSpan.setSketchVersion("2023.02");
 
   homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
   homeSpan.setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
@@ -443,7 +443,7 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("Contact Switch");
-    new ContactSwitch(CONTACT_SWITCH); 
+    new ContactSwitch(CONTACT_SWITCH);                // not connected to correct pin for ESP32-C3 :-(
       
   homeSpan.autoPoll();       // start homeSpan.poll() in background
       
