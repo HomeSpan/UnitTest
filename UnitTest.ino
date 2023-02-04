@@ -32,13 +32,14 @@
 #include "extras/Pixel.h"
 #include "extras/PwmPin.h"
 
-#define CONTROL_PIN   F25
-#define STATUS_PIN    F26
-#define LED_RED_PIN   F33
-#define LED_BLUE_PIN  F32
-#define LED_GREEN_PIN F14
-#define LED_BUTTON    F4
-#define PIXEL_PIN     F27
+#define CONTROL_PIN     F25
+#define STATUS_PIN      F26
+#define LED_RED_PIN     F33
+#define LED_BLUE_PIN    F32
+#define LED_GREEN_PIN   F14
+#define LED_BUTTON      F4
+#define PIXEL_PIN       F27
+#define CONTACT_SWITCH  F21
 
 #if SOC_TOUCH_SENSOR_NUM > 0
   #define PIXEL_BUTTON  F12
@@ -366,7 +367,31 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
   }  // readSensor
   
 };
+
+///////////////////////////////
+
+struct ContactSwitch : Service::ContactSensor {
+
+  SpanCharacteristic *sensorState;
+  SpanToggle *toggleSwitch;
+  
+  ContactSwitch(int togglePin) : Service::ContactSensor(){      // constructor
+
+    toggleSwitch=new SpanToggle(togglePin,PushButton::TRIGGER_ON_HIGH);                                // create toggle switch connected to VCC    
+    sensorState=new Characteristic::ContactSensorState(toggleSwitch->position()==PushButton::OPEN);    // instantiate contact sensor state
+    
+    WEBLOG("Configured Contact Switch on pin %d",togglePin);    
+  }
+
+  void button(int pin, int position) override {      
+    
+      WEBLOG("Contact Switch %s\n",position==PushButton::CLOSED?"CLOSED":"OPEN");
+      sensorState->setVal(position==PushButton::OPEN);
       
+  }
+  
+};
+
 ///////////////////////////////
 
 void setup() {
@@ -413,6 +438,12 @@ void setup() {
       new Characteristic::SerialNumber("ADT7410");    
       new Characteristic::Model("Adafruit I2C Temp Sensor");
     new TempSensor(0x48);
+
+  new SpanAccessory();
+    new Service::AccessoryInformation();
+      new Characteristic::Identify(); 
+      new Characteristic::Name("Contact Switch");
+    new ContactSwitch(CONTACT_SWITCH); 
       
   homeSpan.autoPoll();       // start homeSpan.poll() in background
       
@@ -438,5 +469,6 @@ void wifiEstablished(){
   printPin(LED_BUTTON);
   printPin(PIXEL_PIN);
   printPin(PIXEL_BUTTON);
+  printPin(CONTACT_SWITCH);
   Serial.printf("\n\n");
 }
