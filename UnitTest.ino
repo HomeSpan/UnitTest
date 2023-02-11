@@ -386,9 +386,8 @@ struct ContactSwitch : Service::ContactSensor {
   void button(int pin, int position) override {      
     
       WEBLOG("Contact Switch %s\n",position==SpanToggle::CLOSED?"CLOSED":"OPEN");
-      sensorState->setVal(position==SpanToggle::OPEN?1:0);
-      
-  }
+      sensorState->setVal(position==SpanToggle::OPEN?1:0);   
+  }  
   
 };
 
@@ -400,7 +399,7 @@ void setup() {
 
   homeSpan.setControlPin(CONTROL_PIN);
   homeSpan.setStatusPin(STATUS_PIN);
-  homeSpan.enableOTA();
+  homeSpan.enableOTA("unit-test");
   homeSpan.setLogLevel(2);
   homeSpan.setWifiCallback(wifiEstablished);
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
