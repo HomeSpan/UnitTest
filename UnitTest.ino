@@ -442,7 +442,7 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("Contact Switch");
-    new ContactSwitch(CONTACT_SWITCH);                // not connected to correct pin for ESP32-C3 :-(
+    new ContactSwitch(CONTACT_SWITCH);
       
   homeSpan.autoPoll();       // start homeSpan.poll() in background
       
