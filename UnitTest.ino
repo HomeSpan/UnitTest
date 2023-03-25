@@ -385,7 +385,7 @@ struct ContactSwitch : Service::ContactSensor {
 
   void button(int pin, int position) override {      
     
-      WEBLOG("Contact Switch %s\n",position==SpanToggle::CLOSED?"CLOSED":"OPEN");
+      WEBLOG("Contact Switch %s",position==SpanToggle::CLOSED?"CLOSED":"OPEN");
       sensorState->setVal(position==SpanToggle::OPEN?1:0);   
   }  
   
