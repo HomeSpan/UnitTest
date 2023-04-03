@@ -35,8 +35,8 @@
 #define CONTROL_PIN     F25
 #define STATUS_PIN      F26
 #define LED_RED_PIN     F33
-#define LED_BLUE_PIN    F32
-#define LED_GREEN_PIN   F14
+#define LED_GREEN_PIN   F32
+#define LED_BLUE_PIN    F14
 #define LED_BUTTON      F4
 #define PIXEL_PIN       F27
 #define CONTACT_SWITCH  F21
@@ -428,7 +428,7 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("PWM LED");
-    new RGB_LED(LED_RED_PIN,LED_BLUE_PIN,LED_GREEN_PIN,LED_BUTTON);   
+    new RGB_LED(LED_RED_PIN,LED_GREEN_PIN,LED_BLUE_PIN,LED_BUTTON);   
 
   new SpanAccessory();   
     new Service::AccessoryInformation();
