@@ -403,6 +403,13 @@ void setup() {
   homeSpan.setLogLevel(2);
   homeSpan.setWifiCallback(wifiEstablished);
   homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
+  
+  homeSpan.setWebLogCSS(".bod1 {background-color:lightyellow;}"
+                        ".bod1 h2 {color:blue;}"
+                        ".tab1 {background-color:lightgreen;}"
+                        ".tab2 {background-color:lightblue;} .tab2 th {color:red;} .tab2 td {color:darkblue; text-align:center;}"
+                        );
+                        
   homeSpan.setSketchVersion("2023.02");
 
   homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
