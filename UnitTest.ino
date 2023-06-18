@@ -29,8 +29,6 @@
 #include "FeatherPins.h"
 
 #include "HomeSpan.h"
-#include "extras/Pixel.h"
-#include "extras/PwmPin.h"
 
 #define CONTROL_PIN     F25
 #define STATUS_PIN      F26
@@ -416,6 +414,12 @@ void setup() {
   homeSpan.setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
 
   new SpanUserCommand('D', " - disconnect WiFi", [](const char *buf){WiFi.disconnect();});
+
+  new SpanUserCommand('T', " - print the time",[](const char *buf){
+    struct tm cTime;
+    getLocalTime(&cTime);
+    Serial.printf("Current Time = %02d:%02d:%02d\n",cTime.tm_hour,cTime.tm_min,cTime.tm_sec);
+  });
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
