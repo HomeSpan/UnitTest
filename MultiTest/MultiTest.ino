@@ -395,23 +395,20 @@ void setup() {
   
   Serial.begin(115200);
 
-  homeSpan.setControlPin(CONTROL_PIN);
-  homeSpan.setStatusPin(STATUS_PIN);
-  homeSpan.enableOTA("unit-test");
-  homeSpan.setLogLevel(2);
-  homeSpan.setWifiCallback(wifiEstablished);
-  homeSpan.enableWebLog(50,"pool.ntp.org","CST6CDT");
-  
-  homeSpan.setWebLogCSS(".bod1 {background-color:lightyellow;}"
+  homeSpan.setControlPin(CONTROL_PIN)
+          .setStatusPin(STATUS_PIN)
+          .setLogLevel(2)
+          .setWifiCallback(wifiEstablished)
+          .setSketchVersion("2023.07")
+          .enableWebLog(50,"pool.ntp.org","CST6CDT")
+          .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
+          .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
+          .setWebLogCSS(".bod1 {background-color:lightyellow;}"
                         ".bod1 h2 {color:blue;}"
                         ".tab1 {background-color:lightgreen;}"
                         ".tab2 {background-color:lightblue;} .tab2 th {color:red;} .tab2 td {color:darkblue; text-align:center;}"
-                        );
-                        
-  homeSpan.setSketchVersion("2023.02");
-
-  homeSpan.setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");});
-  homeSpan.setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));});
+                       )
+          .enableOTA("unit-test");
 
   new SpanUserCommand('D', " - disconnect WiFi", [](const char *buf){WiFi.disconnect();});
 
