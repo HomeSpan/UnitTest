@@ -418,6 +418,8 @@ void setup() {
     Serial.printf("Current Time = %02d:%02d:%02d\n",cTime.tm_hour,cTime.tm_min,cTime.tm_sec);
   });
 
+  homeSpan.setWebLogCallback([](String &r){r+="<tr><td>Free RAM:</td><td>" + String(heap_caps_get_free_size(MALLOC_CAP_INTERNAL)) + " bytes</td></tr>\n";});
+
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
   new SpanAccessory();
@@ -466,7 +468,7 @@ void loop() {
 void wifiEstablished(){
 
   #define printPin(X)   Serial.printf("%-15s = %4s (GPIO %d)\n",#X,STRINGIFY(X),X);
-
+ 
   Serial.printf("\nHOMESPAN UNIT TEST PINS:\n\n");
   printPin(CONTROL_PIN);
   printPin(STATUS_PIN);
