@@ -32,8 +32,6 @@
 
 #include "FeatherPins.h"
 #include "HomeSpan.h"
-#include "extras/Stepper_TB6612.h"     // this contains HomeSpan's StepperControl Class for the Adafruit TB6612 driver board
-#include "extras/Stepper_A3967.h"      // this contains HomeSpan's StepperControl Class for the Sparkfun A3967 driver board
 
 ////////////////////////////////////
 
