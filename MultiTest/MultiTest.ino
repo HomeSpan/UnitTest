@@ -415,7 +415,7 @@ void setup() {
   new SpanUserCommand('T', " - print the time",[](const char *buf){
     struct tm cTime;
     getLocalTime(&cTime);
-    Serial.printf("Current Time = %02d:%02d:%02d\n",cTime.tm_hour,cTime.tm_min,cTime.tm_sec);
+    Serial.printf("Current Time = %02d/%02d/%04d  %02d:%02d:%02d\n",cTime.tm_mon+1,cTime.tm_mday,cTime.tm_year+1900,cTime.tm_hour,cTime.tm_min,cTime.tm_sec);
   });
 
   homeSpan.setWebLogCallback([](String &r){r+="<tr><td>Free RAM:</td><td>" + String(heap_caps_get_free_size(MALLOC_CAP_INTERNAL)) + " bytes</td></tr>\n";});
