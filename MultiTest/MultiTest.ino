@@ -109,9 +109,9 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
     
     LedPin::HSVtoRGB(h,s/100.0,v/100.0,&r,&g,&b);   // since HomeKit provides S and V in percent, scale down by 100
 
-    redPin->set(r*p*100.0);                         // update the ledPin channels with new values
-    greenPin->set(g*p*100.0);    
-    bluePin->set(b*p*100.0);
+    redPin->fade(r*p*100.0,1000,LedPin::PROPORTIONAL);                         // update the ledPin channels with new values
+    greenPin->fade(g*p*100.0,1000,LedPin::PROPORTIONAL);    
+    bluePin->fade(b*p*100.0,1000,LedPin::PROPORTIONAL);
 
     if(power.updated())
       WEBLOG("HomeKit set PWM LED %s",p?"ON":"OFF");
