@@ -409,9 +409,16 @@ void setup() {
                         ".tab2 {background-color:lightblue;} .tab2 th {color:red;} .tab2 td {color:darkblue; text-align:center;}"
                        )
           .setPairingCode("34456777")
-          .enableOTA("unit-test");
+          .setConnectionTimes(5,60,3)
+          .enableWiFiRescan(1,2)
+          .addBssidName("34:98:B5:DB:3E:C0","Great Room")
+          .addBssidName("3A:98:B5:db:53:5e","Upstairs Hallway")
+          .addBssidName("3A:98:B5:EF:BF:69","Kitchen")
+          .addBssidName("3A:98:B5:DB:54:86","Basement");          
 
-  new SpanUserCommand('D', " - disconnect WiFi", [](const char *buf){WiFi.disconnect();});
+  homeSpan.enableOTA("unit-test");
+
+  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
 
   new SpanUserCommand('T', " - print the time",[](const char *buf){
     struct tm cTime;
