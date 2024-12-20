@@ -427,7 +427,8 @@ void setup() {
     Serial.printf("Current Time = %02d/%02d/%04d  %02d:%02d:%02d\n",cTime.tm_mon+1,cTime.tm_mday,cTime.tm_year+1900,cTime.tm_hour,cTime.tm_min,cTime.tm_sec);
   });
 
-  homeSpan.setWebLogCallback([](String &r){r+="<tr><td>Free RAM:</td><td>" + String(heap_caps_get_free_size(MALLOC_CAP_INTERNAL)) + " bytes</td></tr>\n";});
+  homeSpan.setWebLogCallback([](String &r){r="<tr><td>Free DRAM:</td><td>" + String(esp_get_free_internal_heap_size()) + " bytes</td></tr>\n" +
+    "</table><p><a href=\"https://github.com/HomeSpan/HomeSpan\">Click Here to Access HomeSpan Repo</a></p>";});
 
   homeSpan.begin(Category::Bridges,"HomeSpan UnitTest" DEVICE_SUFFIX);
 
