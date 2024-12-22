@@ -51,7 +51,6 @@ CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 
 CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
 CUSTOM_CHAR(FavoriteBrightness, 00000003-0001-0001-0001-46637266EA00, PR+PW+EV, INT, 0, 0, 100, false);
 
-
 ///////////////////////////////
 
 struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
@@ -389,6 +388,8 @@ struct ContactSwitch : Service::ContactSensor {
   
 };
 
+NeoPixel *savedNeoPixel;
+
 ///////////////////////////////
 
 void setup() {
@@ -442,7 +443,7 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("NeoPixel LED");
-    new NeoPixel(PIXEL_PIN,PIXEL_BUTTON);
+    savedNeoPixel = new NeoPixel(PIXEL_PIN,PIXEL_BUTTON);
  
   new SpanAccessory();
     new Service::AccessoryInformation();
@@ -471,6 +472,19 @@ void setup() {
 ///////////////////////////////
 
 void loop() {
+
+  static const uint32_t waitTime=10000;
+  static uint32_t alarmTime=waitTime;
+
+//  homeSpan.poll();
+
+  if(millis()>alarmTime){
+    homeSpanPAUSE;
+    LOG0("*** Changing state of NeoPixel\n");
+    savedNeoPixel->power.setVal(1-savedNeoPixel->power.getVal());
+    savedNeoPixel->update();
+    alarmTime=millis()+waitTime;
+  }  
 }
 
 ///////////////////////////////
