@@ -399,7 +399,7 @@ void setup() {
   homeSpan.setControlPin(CONTROL_PIN)
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
-          .setWifiCallback(wifiEstablished)
+          .setConnectionCallback(connectionEstablished)
           .setSketchVersion("2024.06")
           .enableWebLog(50,"pool.ntp.org","CST6CDT")
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
@@ -489,7 +489,10 @@ void loop() {
 
 ///////////////////////////////
 
-void wifiEstablished(){
+void connectionEstablished(int nConnects){
+
+  if(nConnects>1)
+    return;
 
   #define printPin(X)   Serial.printf("%-15s = %4s (GPIO %d)\n",#X,STRINGIFY(X),X);
  
