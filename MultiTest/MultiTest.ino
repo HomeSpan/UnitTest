@@ -419,7 +419,7 @@ void setup() {
 
   homeSpan.enableOTA("unit-test");
 
-//  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
+  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
 //  ETH.begin(ETH_PHY_RTL8201, 0, 16, 17, -1, ETH_CLOCK_GPIO0_IN);
 
   new SpanUserCommand('T', " - print the time",[](const char *buf){
@@ -473,7 +473,7 @@ void setup() {
 
 void loop() {
 
-  static const uint32_t waitTime=10000;
+  static const uint32_t waitTime=20000;
   static uint32_t alarmTime=waitTime;
 
 //  homeSpan.poll();
