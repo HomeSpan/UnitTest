@@ -443,8 +443,8 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
       new Characteristic::Name("NeoPixel LED");
-    savedNeoPixel = new NeoPixel(PIXEL_PIN,PIXEL_BUTTON);
- 
+    savedNeoPixel = new NeoPixel(PIXEL_PIN,PIXEL_BUTTON); 
+
   new SpanAccessory();
     new Service::AccessoryInformation();
       new Characteristic::Identify(); 
