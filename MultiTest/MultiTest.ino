@@ -29,6 +29,7 @@
 #include "FeatherPins.h"
 
 #include "HomeSpan.h"
+#include "SpanRollback.h"
 
 #define CONTROL_PIN     F25
 #define STATUS_PIN      F26
@@ -415,7 +416,9 @@ void setup() {
           .addBssidName("34:98:B5:DB:3E:C0","Great Room")
           .addBssidName("3A:98:B5:db:53:5e","Upstairs Hallway")
           .addBssidName("3A:98:B5:EF:BF:69","Kitchen")
-          .addBssidName("3A:98:B5:DB:54:86","Basement");          
+          .addBssidName("3A:98:B5:DB:54:86","Basement")
+          .setPollingCallback([](){homeSpan.markSketchOK();})
+          .setCompileTime();
 
   homeSpan.enableOTA("unit-test");
 
@@ -473,7 +476,7 @@ void setup() {
 
 void loop() {
 
-  static const uint32_t waitTime=20000;
+  static const uint32_t waitTime=60000;
   static uint32_t alarmTime=waitTime;
 
 //  homeSpan.poll();
