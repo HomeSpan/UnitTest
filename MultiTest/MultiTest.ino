@@ -401,7 +401,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2024.06")
+          .setSketchVersion("2025.01.28")
           .enableWebLog(50,"pool.ntp.org","CST6CDT")
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
@@ -418,11 +418,12 @@ void setup() {
           .addBssidName("3A:98:B5:EF:BF:69","Kitchen")
           .addBssidName("3A:98:B5:DB:54:86","Basement")
           .setPollingCallback([](){homeSpan.markSketchOK();})
+          .enableWatchdog(5)
           .setCompileTime();
 
   homeSpan.enableOTA("unit-test");
 
-  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
+//  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
 //  ETH.begin(ETH_PHY_RTL8201, 0, 16, 17, -1, ETH_CLOCK_GPIO0_IN);
 
   new SpanUserCommand('T', " - print the time",[](const char *buf){
@@ -468,7 +469,7 @@ void setup() {
       new Characteristic::Name("Contact Switch");
     new ContactSwitch(CONTACT_SWITCH);
       
-  homeSpan.autoPoll();       // start homeSpan.poll() in background
+//  homeSpan.autoPoll();       // start homeSpan.poll() in background
       
 }
 
@@ -479,7 +480,7 @@ void loop() {
   static const uint32_t waitTime=60000;
   static uint32_t alarmTime=waitTime;
 
-//  homeSpan.poll();
+  homeSpan.poll();
 
   if(millis()>alarmTime){
     homeSpanPAUSE;
