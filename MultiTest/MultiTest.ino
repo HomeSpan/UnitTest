@@ -52,6 +52,10 @@ CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 
 CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
 CUSTOM_CHAR(FavoriteBrightness, 00000003-0001-0001-0001-46637266EA00, PR+PW+EV, INT, 0, 0, 100, false);
 
+boolean bootControlButton;
+boolean bootLedButton;
+boolean bootToggleSwitch;
+
 ///////////////////////////////
 
 struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
@@ -401,7 +405,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2025.01.28")
+          .setSketchVersion("2025.02.09")
           .enableWebLog(50,"pool.ntp.org","CST6CDT")
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
@@ -418,12 +422,13 @@ void setup() {
           .addBssidName("3A:98:B5:EF:BF:69","Kitchen")
           .addBssidName("3A:98:B5:DB:54:86","Basement")
           .setPollingCallback([](){homeSpan.markSketchOK();})
-          .enableWatchdog(5)
+          .enableWatchdog(15)
           .setCompileTime();
 
   homeSpan.enableOTA("unit-test");
 
-//  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
+//  homeSpan.useEthernet();
+  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
 //  ETH.begin(ETH_PHY_RTL8201, 0, 16, 17, -1, ETH_CLOCK_GPIO0_IN);
 
   new SpanUserCommand('T', " - print the time",[](const char *buf){
@@ -468,8 +473,33 @@ void setup() {
       new Characteristic::Identify(); 
       new Characteristic::Name("Contact Switch");
     new ContactSwitch(CONTACT_SWITCH);
-      
-//  homeSpan.autoPoll();       // start homeSpan.poll() in background
+
+  new SpanUserCommand('D',"- disable HomeSpan watchdog",[](const char *buf){homeSpan.disableWatchdog();});
+  new SpanUserCommand('T',"<nSec> - execute a time delay of nSec seconds",[](const char *buf){delay(atoi(buf+1)*1000);});
+  new SpanUserCommand('E',"- call ETH",[](const char *buf){ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);});
+
+  bootControlButton=!digitalRead(CONTROL_PIN);
+  bootLedButton=!digitalRead(LED_BUTTON);
+  bootToggleSwitch=digitalRead(CONTACT_SWITCH);
+
+  if(bootLedButton){
+    if(bootToggleSwitch){
+      Serial.printf("\n\n*** BOOT TEST: FORCING PANIC IN 2 SECONDS...\n");
+      delay(2000);
+      int *p=NULL;
+      *p=0;
+    } else {
+      Serial.printf("\n\n*** BOOT TEST: ENTERING INFINITE LOOP...\n");
+      while(1);
+    }
+  }
+
+  if(bootControlButton){
+    if(bootToggleSwitch)
+      homeSpan.autoPoll(8192,1,1);
+    else
+      homeSpan.autoPoll();  
+  }
       
 }
 
@@ -480,7 +510,8 @@ void loop() {
   static const uint32_t waitTime=60000;
   static uint32_t alarmTime=waitTime;
 
-  homeSpan.poll();
+  if(!bootControlButton)
+    homeSpan.poll();
 
   if(millis()>alarmTime){
     homeSpanPAUSE;
@@ -488,7 +519,8 @@ void loop() {
     savedNeoPixel->power.setVal(1-savedNeoPixel->power.getVal());
     savedNeoPixel->update();
     alarmTime=millis()+waitTime;
-  }  
+  }
+
 }
 
 ///////////////////////////////
@@ -512,3 +544,5 @@ void connectionEstablished(int nConnects){
   printPin(CONTACT_SWITCH);
   Serial.printf("\n\n");
 }
+
+///////////////////////////////
