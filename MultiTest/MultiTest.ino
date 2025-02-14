@@ -428,7 +428,11 @@ void setup() {
   homeSpan.enableOTA("unit-test");
 
 //  homeSpan.useEthernet();
+
+// C3 WARNING: pin 16 is used for Serial RX. If ETH is selected, chip will not allow input from Serial Monitor
+
   ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
+
 //  ETH.begin(ETH_PHY_RTL8201, 0, 16, 17, -1, ETH_CLOCK_GPIO0_IN);
 
   new SpanUserCommand('T', " - print the time",[](const char *buf){
