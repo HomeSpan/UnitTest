@@ -58,7 +58,7 @@ boolean bootToggleSwitch;
 
 ///////////////////////////////
 
-struct RGB_LED : Service::LightBulb {          // RGB LED (Command Cathode)
+struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
 
   Characteristic::On power{0,true};
   Characteristic::Hue H{0,true};
