@@ -76,6 +76,8 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
   float favoriteV=50;
     
   RGB_LED(int red_pin, int green_pin, int blue_pin, int buttonPin) : Service::LightBulb(){
+
+    new Characteristic::ConfiguredName("",true);
     
     V.setRange(5,100,1);              // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     
@@ -116,7 +118,7 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
     redPin->fade(r*p*100.0,1000,LedPin::PROPORTIONAL);                         // update the ledPin channels with new values
     greenPin->fade(g*p*100.0,1000,LedPin::PROPORTIONAL);    
     bluePin->fade(b*p*100.0,1000,LedPin::PROPORTIONAL);
-
+    
     if(power.updated())
       WEBLOG("HomeKit set PWM LED %s",p?"ON":"OFF");
       
@@ -194,6 +196,8 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
   float favoriteV=50;
   
   NeoPixel(int pin, int touchPin) : Service::LightBulb(){
+
+    new Characteristic::ConfiguredName("",true);
 
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
@@ -295,6 +299,8 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
   
   TempSensor(int addr) : Service::TemperatureSensor(){       // constructor() method
 
+    new Characteristic::ConfiguredName("",true);
+
     this->addr=addr;                      // I2C address of temperature sensor
     temp.setRange(-50,100);
 
@@ -378,6 +384,8 @@ struct ContactSwitch : Service::ContactSensor {
   SpanToggle *toggleSwitch;
   
   ContactSwitch(int togglePin) : Service::ContactSensor(){      // constructor
+
+    new Characteristic::ConfiguredName("",true);
 
     toggleSwitch=new SpanToggle(togglePin,SpanToggle::TRIGGER_ON_HIGH);                                // create toggle switch connected to VCC    
     sensorState=new Characteristic::ContactSensorState(toggleSwitch->position()==SpanToggle::OPEN);    // instantiate contact sensor state
