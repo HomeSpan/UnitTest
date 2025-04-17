@@ -52,6 +52,9 @@ CUSTOM_CHAR(FavoriteHue, 00000001-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 
 CUSTOM_CHAR(FavoriteSaturation, 00000002-0001-0001-0001-46637266EA00, PR+PW+EV, FLOAT, 0, 0, 100, false);
 CUSTOM_CHAR(FavoriteBrightness, 00000003-0001-0001-0001-46637266EA00, PR+PW+EV, INT, 0, 0, 100, false);
 
+CUSTOM_CHAR_STRING(FreeStringRW,00000020-0001-0001-0001-46637266EA00,PR+PW,"");
+CUSTOM_CHAR_STRING(FreeStringRV,00000050-0001-0001-0001-46637266EA00,PR+EV,"");
+
 boolean bootControlButton;
 boolean bootLedButton;
 boolean bootToggleSwitch;
@@ -69,6 +72,9 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
   Characteristic::FavoriteSaturation fS{100,true};
   Characteristic::FavoriteBrightness fV{100,true};
   
+  SpanCharacteristic *stringRW;
+  SpanCharacteristic *stringRV;
+  
   LedPin *redPin, *greenPin, *bluePin;
 
   float favoriteH=240;
@@ -77,7 +83,9 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
     
   RGB_LED(int red_pin, int green_pin, int blue_pin, int buttonPin) : Service::LightBulb(){
 
-    new Characteristic::ConfiguredName("",true);
+    new Characteristic::ConfiguredName("PWM LED",true);
+    stringRW=(new Characteristic::FreeStringRW("String RW",true))->setDescription("RW String");
+    stringRV=(new Characteristic::FreeStringRV("String RV",true))->setDescription("RV String");
     
     V.setRange(5,100,1);              // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     
@@ -121,6 +129,9 @@ struct RGB_LED : Service::LightBulb {          // RGB LED (Common Cathode)
     
     if(power.updated())
       WEBLOG("HomeKit set PWM LED %s",p?"ON":"OFF");
+
+    if(stringRW->updated())
+      stringRV->setString(stringRW->getNewString());
       
     return(true);                              // return true 
   }
@@ -197,7 +208,7 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
   
   NeoPixel(int pin, int touchPin) : Service::LightBulb(){
 
-    new Characteristic::ConfiguredName("",true);
+    new Characteristic::ConfiguredName("NeoPixel LED",true);
 
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
@@ -299,7 +310,7 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
   
   TempSensor(int addr) : Service::TemperatureSensor(){       // constructor() method
 
-    new Characteristic::ConfiguredName("",true);
+    new Characteristic::ConfiguredName("Temp Sensor",true);
 
     this->addr=addr;                      // I2C address of temperature sensor
     temp.setRange(-50,100);
@@ -385,7 +396,7 @@ struct ContactSwitch : Service::ContactSensor {
   
   ContactSwitch(int togglePin) : Service::ContactSensor(){      // constructor
 
-    new Characteristic::ConfiguredName("",true);
+    new Characteristic::ConfiguredName("Contact Switch",true);
 
     toggleSwitch=new SpanToggle(togglePin,SpanToggle::TRIGGER_ON_HIGH);                                // create toggle switch connected to VCC    
     sensorState=new Characteristic::ContactSensorState(toggleSwitch->position()==SpanToggle::OPEN);    // instantiate contact sensor state
