@@ -198,7 +198,9 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
 
   Characteristic::FavoriteHue fH{120,true};           // use custom characteristics to store favorite settings for RGB button
   Characteristic::FavoriteSaturation fS{100,true};
-  Characteristic::FavoriteBrightness fV{100,true};                                
+  Characteristic::FavoriteBrightness fV{100,true};
+
+  Characteristic::ConfiguredName name{"NeoPixel LED",true};
   
   Pixel *pixel;
 
@@ -207,8 +209,6 @@ struct NeoPixel : Service::LightBulb {      // NeoPixel RGB
   float favoriteV=50;
   
   NeoPixel(int pin, int touchPin) : Service::LightBulb(){
-
-    new Characteristic::ConfiguredName("NeoPixel LED",true);
 
     V.setRange(5,100,1);                      // sets the range of the Brightness to be from a min of 5%, to a max of 100%, in steps of 1%
     pixel=new Pixel(pin);                     // creates pixel LED on specified pin using default timing parameters suitable for most SK68xx LEDs
@@ -500,6 +500,14 @@ void setup() {
   new SpanUserCommand('D',"- disable HomeSpan watchdog",[](const char *buf){homeSpan.disableWatchdog();});
   new SpanUserCommand('T',"<nSec> - execute a time delay of nSec seconds",[](const char *buf){delay(atoi(buf+1)*1000);});
   new SpanUserCommand('E',"- call ETH",[](const char *buf){ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);});
+  new SpanUserCommand('N',"<name> - rename NeoPixel",[](const char *buf){savedNeoPixel->name.setString(buf+1);});
+  
+  new SpanUserCommand('R',"- show NeoPixel name bytes",[](const char *buf){
+    char *p=savedNeoPixel->name.getString();
+    for(int i=0;i<strlen(p);i++)
+      Serial.printf(" %02X",p[i]);
+    Serial.printf("\n");
+  }); 
 
   bootControlButton=!digitalRead(CONTROL_PIN);
   bootLedButton=!digitalRead(LED_BUTTON);
