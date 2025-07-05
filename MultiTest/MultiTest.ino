@@ -446,6 +446,9 @@ void setup() {
 
   homeSpan.enableOTA("unit-test");
 
+  WiFi.enableIPv6();
+  ETH.enableIPv6();
+
 //  homeSpan.useEthernet();
 
 // C3 WARNING: pin 16 is used for Serial RX. If ETH is selected, chip will not allow input from Serial Monitor
