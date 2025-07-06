@@ -504,6 +504,7 @@ void setup() {
   new SpanUserCommand('T',"<nSec> - execute a time delay of nSec seconds",[](const char *buf){delay(atoi(buf+1)*1000);});
   new SpanUserCommand('E',"- call ETH",[](const char *buf){ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);});
   new SpanUserCommand('N',"<name> - rename NeoPixel",[](const char *buf){savedNeoPixel->name.setString(buf+1);});
+  new SpanUserCommand('n',"- show network info",[](const char *buf){Serial.printf("\n\n");ETH.printTo(Serial);Serial.printf("\n\n");WiFi.STA.printTo(Serial);});
   
   new SpanUserCommand('R',"- show NeoPixel name bytes",[](const char *buf){
     char *p=savedNeoPixel->name.getString();
