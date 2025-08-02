@@ -424,7 +424,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2025.02.09")
+          .setSketchVersion("2025.08.02")
           .enableWebLog(50,"pool.ntp.org","CST6CDT")
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
