@@ -26,7 +26,6 @@
  ********************************************************************************/
 
 #include <Wire.h>
-#include "FeatherPins.h"
 
 #include "HomeSpan.h"
 #include "SpanRollback.h"
