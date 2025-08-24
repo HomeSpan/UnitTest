@@ -305,7 +305,6 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
   Characteristic::StatusActive status{0};
   
   int addr;                                          // I2C address of temperature sensor
-  uint32_t timer=0;                                  // keep track of time since last update
   
   TempSensor(int addr) : Service::TemperatureSensor(){       // constructor() method
 
@@ -315,54 +314,32 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
     temp.setRange(-50,100);
 
     Wire.setPins(SDA,SCL);                // set I2C pins
-    Wire.begin();                         // start I2C in Controller Mode
-    
-    WEBLOG("Configured Temp Sensor using I2C SDA=%d and SCL=%d pins",SDA,SCL);
+    Wire.begin();                         // start I2C in Controller Mode   
+    Wire.beginTransmission(addr);         // setup transmission
+    Wire.write(0x0B);                     // ADT7410 Identification Register
+    Wire.endTransmission(0);              // transmit and leave in restart mode to allow reading
+    Wire.requestFrom(addr,1);             // request read of single byte
 
-    readSensor();                         // initial read of Sensor
+    if(Wire.read()==0xCB){                // correct ID of temperature sensor read      
+      Wire.beginTransmission(addr);       // setup transmission
+      Wire.write(0x03);                   // ADT740 Configuration Register
+      Wire.write(0xC0);                   // set 16-bit temperature resolution, 1 sample per second
+      Wire.endTransmission();             // transmit      
+      status.setVal(1);                   // set status to ACTIVE
+    }
+
+    WEBLOG("ADT7410-%02X Temperature Sensor %sfound\n",addr,status.getVal()?"":"NOT ");
         
   } // end constructor
 
   void loop(){
 
-    if(millis()-timer>5000){                // only sample every 5 seconds
-      timer=millis();
+    if(status.getVal() && status.timeVal()>5000)        // if temp sensor ACTIVE, sample every 5 seconds
       readSensor();      
-    }
     
   } // loop
 
   void readSensor(){
-
-    char c[64];
-    uint8_t oldStatus=status.getVal();
-    
-    Wire.beginTransmission(addr);         // setup transmission
-    Wire.write(0x0B);                     // ADT7410 Identification Register
-    Wire.endTransmission(0);              // transmit and leave in restart mode to allow reading
-    Wire.requestFrom(addr,1);             // request read of single byte
-    uint8_t id=Wire.read();               // receive a byte
-
-    if(id!=0xCB){                         // problem reading from chip
-      if(oldStatus){                      // oldStatus was okay
-        status.setVal(0);                   // set status to inactive, and
-        temp.setVal(-40);                   // set temperature to -40
-        
-        sprintf(c,"ADT7410-%02X Temperature Sensor is INACTIVE\n",addr);
-        LOG1(c);
-      }
-      return;
-    }
-
-    if(!oldStatus){                       // oldStatus was not okay
-      Wire.beginTransmission(addr);         // setup transmission
-      Wire.write(0x03);                     // ADT740 Configuration Register
-      Wire.write(0xC0);                     // set 16-bit temperature resolution, 1 sample per second
-      Wire.endTransmission();               // transmit      
-      status.setVal(1);
-      sprintf(c,"ADT7410-%02X Temperature Sensor is ACTIVE\n",addr);
-      LOG1(c);
-    }
 
     Wire.beginTransmission(addr);         // setup transmission
     Wire.write(0x00);                     // ADT7410 2-byte Temperature
@@ -377,9 +354,8 @@ struct TempSensor : Service::TemperatureSensor {     // A standalone Temperature
 
     if(abs(temp.getVal<double>()-tempC)>0.50){    // only update temperature if change is more than 0.5C     
       temp.setVal(tempC);
-      
-      sprintf(c,"ADT7410-%02X Temperature Update: %g\n",addr,tempC);
-      LOG1(c);
+     
+      LOG0("ADT7410-%02X Temperature Update: %g\n",addr,tempC);
     }
     
   }  // readSensor
@@ -423,7 +399,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2025.08.02")
+          .setSketchVersion("2025.08.24")
           .enableWebLog(50,"pool.ntp.org","CST6CDT")
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
@@ -564,7 +540,7 @@ void connectionEstablished(int nConnects){
   if(nConnects>1)
     return;
 
-  #define printPin(X)   Serial.printf("%-15s = %4s (GPIO %d)\n",#X,STRINGIFY(X),X);
+  #define printPin(X)   Serial.printf("%-15s = GPIO %d\n",#X,X);
  
   Serial.printf("\nHOMESPAN UNIT TEST PINS:\n\n");
   printPin(CONTROL_PIN);
