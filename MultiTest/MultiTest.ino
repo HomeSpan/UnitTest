@@ -517,18 +517,14 @@ void setup() {
 
 void loop() {
 
-  static const uint32_t waitTime=60000;
-  static uint32_t alarmTime=waitTime;
-
   if(!bootControlButton)
     homeSpan.poll();
 
-  if(millis()>alarmTime){
+  if(savedNeoPixel->power.timeVal()>60000){
     homeSpanPAUSE;
     LOG0("*** Changing state of NeoPixel\n");
     savedNeoPixel->power.setVal(1-savedNeoPixel->power.getVal());
     savedNeoPixel->update();
-    alarmTime=millis()+waitTime;
   }
 
 }
