@@ -400,7 +400,7 @@ void setup() {
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
           .setSketchVersion("2025.08.24")
-          .enableWebLog(50,"pool.ntp.org","CST6CDT")
+          .enableWebLog(50,"pool.ntp.org","CST6CDT").setWebLogFavicon()
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
           .setWebLogCSS(".bod1 {background-color:lightyellow;}"
@@ -428,7 +428,7 @@ void setup() {
 
 // C3 WARNING: pin 16 is used for Serial RX. If ETH is selected, chip will not allow input from Serial Monitor
 
-  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
+//  ETH.begin(ETH_PHY_W5500, 1, F16, -1, -1, SPI2_HOST, SCK, MISO, MOSI);
 
 //  ETH.begin(ETH_PHY_RTL8201, 0, 16, 17, -1, ETH_CLOCK_GPIO0_IN);
 
