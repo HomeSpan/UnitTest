@@ -25,6 +25,10 @@
  *  
  ********************************************************************************/
 
+#ifndef HS_FEATHER_PINS
+#error "Can't compile - Feather Pins NOT defined"
+#endif
+
 #include <Wire.h>
 
 #include "HomeSpan.h"
@@ -399,7 +403,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2025.08.24")
+          .setSketchVersion("2025.09.21")
           .enableWebLog(50,"pool.ntp.org","CST6CDT").setWebLogFavicon()
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
