@@ -403,7 +403,7 @@ void setup() {
           .setStatusPin(STATUS_PIN)
           .setLogLevel(2)
           .setConnectionCallback(connectionEstablished)
-          .setSketchVersion("2025.10.11")
+          .setSketchVersion("2025.10.24")
           .enableWebLog(50,"pool.ntp.org","CST6CDT").setWebLogFavicon()
           .setPairCallback([](boolean paired){Serial.printf("\n*** DEVICE HAS BEEN %sPAIRED ***\n\n",paired?"":"UN-");})
           .setStatusCallback([](HS_STATUS status){Serial.printf("\n*** HOMESPAN STATUS: %s\n\n",homeSpan.statusString(status));})
@@ -416,11 +416,11 @@ void setup() {
           .setConnectionTimes(5,60,3)
           .enableWiFiRescan(1,2)
           .addBssidName("34:98:B5:DB:3E:C0","Great Room - 2.4 GHz")
-          .addBssidName("3A:98:B5:db:53:5e","Upstairs Hallway - 2.4 GHz")
+          .addBssidName("3A:98:B5:DB:53:5E","Upstairs Hallway - 2.4 GHz")
           .addBssidName("3A:98:B5:EF:BF:69","Kitchen - 2.4 GHz")
           .addBssidName("3A:98:B5:DB:54:86","Basement - 2.4 GHz")
           .addBssidName("34:98:B5:DB:3E:C1","Great Room - 5.0 GHz")
-          .addBssidName("3A:98:B5:db:53:5f","Upstairs Hallway - 5.0 GHz")
+          .addBssidName("3A:98:B5:DB:53:5F","Upstairs Hallway - 5.0 GHz")
           .addBssidName("3A:98:B5:EF:BF:6A","Kitchen - 5.0 GHz")
           .addBssidName("3A:98:B5:DB:54:87","Basement - 5.0 GHz")
           .setPollingCallback([](){homeSpan.markSketchOK();})
@@ -435,6 +435,7 @@ void setup() {
   #if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 2)) && SOC_WIFI_SUPPORT_5G
     WiFi.STA.begin();
     WiFi.setBandMode(WIFI_BAND_MODE_5G_ONLY);
+    homeSpan.setConnectionTimes(30,60,5);
   #endif
 
 //  homeSpan.useEthernet();
