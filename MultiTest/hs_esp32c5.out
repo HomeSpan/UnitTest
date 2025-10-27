@@ -1,2 +1,11 @@
+In file included from /Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/esp_hw_support/include/esp_private/regi2c_ctrl.h:15,
+                 from /Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/hal/platform_port/include/hal/regi2c_ctrl.h:17,
+                 from /Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/hal/esp32c5/include/hal/clk_tree_ll.h:18,
+                 from /Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/hal/esp32c5/include/hal/spimem_flash_ll.h:31,
+                 from /Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/hal/esp32c5/include/hal/spi_flash_ll.h:18,
+                 from /Users/Gregg/Library/Arduino15/packages/esp32/hardware/esp32/3.3.2/cores/esp32/Esp.cpp:41:
+/Users/Gregg/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.5-07e9bf49-v1/esp32c5/include/esp_hw_support/include/esp_private/periph_ctrl.h:87:64: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+   87 | #define __PERIPH_CTRL_DEPRECATE_ATTR __attribute__((deprecated("This function is not functional on "CONFIG_IDF_TARGET)))
+      |                                                                ^
 Sketch uses 1724758 bytes (87%) of program storage space. Maximum is 1966080 bytes.
 Global variables use 62300 bytes (19%) of dynamic memory, leaving 265380 bytes for local variables. Maximum is 327680 bytes.
